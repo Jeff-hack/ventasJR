@@ -5,1311 +5,759 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0a3d2e">
-<title>Control de Ventas - JR</title>
-
+<meta name="theme-color" content="#0d1f17">
+<title>JR Ventas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
-<style>
-/* ══════════════════════════════════════════
-   ESTILOS GENERALES (SISTEMA DE DISEÑO)
-   ══════════════════════════════════════════ */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
-
-:root {
-  --bg: #f4f1eb;
-  --surface: #ffffff;
-  --surface2: #f9f7f3;
-  --primary: #0a3d2e;
-  --primary-l: #e8f7f1;
-  --text: #1a1a1a;
-  --text2: #5a5a5a;
-  --text3: #9a9a9a;
-  --border: #e2ddd5;
-  --green: #1d9e75;
-  --red: #d44f2e;
-  --orange: #e8a020;
-  --gold: #c4860a;
-  --blue: #2563eb;
-  --radius: 16px;
-  --radius-sm: 10px;
-  --shadow: 0 4px 12px rgba(10, 61, 46, 0.05);
-  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-html, body {
-  height: 100%;
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  overflow: hidden;
-}
-
-#app {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  max-width: 430px;
-  margin: 0 auto;
-  background: var(--surface);
-  position: relative;
-  box-shadow: 0 0 30px rgba(0,0,0,0.05);
-}
-
-/* HEADER SUPERIOR */
-.header {
-  background: var(--primary);
-  color: #fff;
-  padding: 18px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-shrink: 0;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.logo {
-  width: 42px;
-  height: 42px;
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 15px;
-  letter-spacing: 0.5px;
-  border: 1px solid rgba(255,255,255,0.2);
-}
-
-.header-title {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-}
-
-.header-sub {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.65);
-  margin-top: 1px;
-}
-
-.header-date-btn {
-  background: rgba(255, 255, 255, 0.15);
-  padding: 8px 14px;
-  border-radius: 30px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: var(--transition);
-  border: 1px solid rgba(255,255,255,0.1);
-}
-
-.header-date-btn:active {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(0.96);
-}
-
-/* CUERPO Y CONTENEDORES SCROLL */
-.app-body {
-  flex: 1;
-  overflow-y: auto;
-  padding-bottom: 24px;
-  background: var(--surface2);
-}
-
-.app-panel {
-  display: none;
-}
-
-.app-panel.active {
-  display: block;
-}
-
-/* TARJETA DE RESUMEN FINANCIERO (MOCKUP STYLE) */
-.main-summary-card {
-  background: var(--surface);
-  border-radius: var(--radius);
-  margin: 16px;
-  padding: 20px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 18px;
-}
-
-.summary-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.summary-label {
-  font-size: 11px;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  font-weight: 600;
-}
-
-.summary-value {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--text);
-  font-family: 'DM Mono', monospace;
-}
-
-.summary-footer-main {
-  border-top: 1px dashed var(--border);
-  padding-top: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.summary-label-main {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text2);
-}
-
-.summary-value-main {
-  font-size: 26px;
-  font-weight: 700;
-  font-family: 'DM Mono', monospace;
-}
-
-/* METAS DE VENTAS */
-.meta-container {
-  padding: 0 16px;
-  margin-bottom: 16px;
-}
-
-.meta-box {
-  background: var(--surface);
-  border-radius: var(--radius-sm);
-  padding: 12px 16px;
-  border: 1px solid var(--border);
-}
-
-.meta-info {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  margin-bottom: 6px;
-  color: var(--text2);
-}
-
-.meta-bar-bg {
-  height: 8px;
-  background: var(--bg);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.meta-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--orange), var(--gold));
-  width: 0%;
-  transition: width 0.5s ease;
-}
-
-/* BOTONES DE ACCIÓN RÁPIDA */
-.quick-actions-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  padding: 0 16px;
-  margin-bottom: 20px;
-}
-
-.action-btn {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 12px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.action-btn:active {
-  background: var(--primary-l);
-  border-color: var(--primary);
-  transform: scale(0.95);
-}
-
-.action-btn-icon {
-  font-size: 20px;
-}
-
-.action-btn-text {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text2);
-  text-align: center;
-}
-
-/* SECCIONES Y CONTENEDORES INTERNOS */
-.section-header {
-  padding: 8px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.section-title {
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text2);
-}
-
-.section-action {
-  font-size: 13px;
-  color: var(--primary);
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* TARJETAS DE LISTADO (VENTAS, PRODUCTOS, GASTOS) */
-.list-container {
-  padding: 0 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.card-item {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.01);
-  transition: var(--transition);
-}
-
-.card-item:active {
-  background: #fdfcf9;
-}
-
-.card-left {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.card-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.card-subtitle {
-  font-size: 12px;
-  color: var(--text3);
-}
-
-.card-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-}
-
-.card-price {
-  font-size: 15px;
-  font-weight: 700;
-  font-family: 'DM Mono', monospace;
-}
-
-/* ELEMENTOS DE FORMULARIO MODERNO */
-.form-section {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.form-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text2);
-}
-
-.form-input {
-  width: 100%;
-  height: 48px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 0 14px;
-  font-size: 14px;
-  font-family: inherit;
-  color: var(--text);
-  outline: none;
-  transition: var(--transition);
-}
-
-.form-input:focus {
-  border-color: var(--primary);
-  background: var(--surface);
-  box-shadow: 0 0 0 3px var(--primary-l);
-}
-
-/* BOTONES */
-.btn-primary {
-  width: 100%;
-  height: 48px;
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: var(--transition);
-}
-
-.btn-primary:active {
-  transform: scale(0.98);
-  opacity: 0.9;
-}
-
-.btn-secondary {
-  width: 100%;
-  height: 44px;
-  background: transparent;
-  color: var(--primary);
-  border: 1px solid var(--primary);
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-/* PESTAÑAS / TABS INTERNOS */
-.tabs-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  padding: 10px 16px;
-}
-
-.tab-btn {
-  height: 38px;
-  border: none;
-  background: var(--bg);
-  color: var(--text2);
-  font-weight: 600;
-  font-size: 13px;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.tab-btn.active {
-  background: var(--primary);
-  color: #fff;
-}
-
-/* MODALES PREMIUM DESLIZANTES DESDE ABAJO */
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(10, 61, 46, 0.4);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  display: none;
-  justify-content: center;
-  align-items: flex-end;
-  z-index: 100;
-  animation: fadeIn 0.2s ease;
-}
-
-.modal {
-  background: var(--surface);
-  width: 100%;
-  max-width: 430px;
-  border-radius: var(--radius) var(--radius) 0 0;
-  padding: 24px;
-  padding-bottom: calc(24px + env(safe-area-inset-bottom));
-  box-shadow: 0 -10px 30px rgba(0,0,0,0.08);
-  transform: translateY(100%);
-  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slideUp { to { transform: translateY(0); } }
-
-.modal-handle {
-  width: 40px;
-  height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  margin: 0 auto 18px;
-}
-
-.modal-title {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 16px;
-  color: var(--text);
-}
-
-/* NAVEGACIÓN INFERIOR (BOTTOM BAR) */
-.nav-bar {
-  height: 64px;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  flex-shrink: 0;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  color: var(--text3);
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.nav-item.active {
-  color: var(--primary);
-}
-
-.nav-icon {
-  font-size: 20px;
-}
-
-.nav-text {
-  font-size: 10px;
-  font-weight: 600;
-}
-
-/* CLASES DE TEXTO */
-.text-green { color: var(--green) !important; }
-.text-red { color: var(--red) !important; }
-.text-orange { color: var(--orange) !important; }
-
-/* REPORTE IMPRIMIBLE (ESTILOS PROTEGIDOS) */
-.rpt-container { padding:24px; background:#fff; color:#000; }
-.rpt-header { border-bottom:2px solid #0a3d2e; padding-bottom:12px; margin-bottom:20px; }
-.rpt-title { font-size:22px; font-weight:700; color:#0a3d2e; }
-.rpt-table { width:100%; border-collapse:collapse; margin-top:14px; }
-.rpt-table th { background:#f4f1eb; text-align:left; padding:8px; font-size:12px; font-weight:700; }
-.rpt-table td { padding:8px; font-size:13px; border-bottom:1px solid #e2ddd5; }
-</style>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
 <div id="app">
 
-  <div class="header">
-    <div class="header-left">
-      <div class="logo">JR</div>
-      <div>
-        <div class="header-title">Control de Negocio</div>
-        <div class="header-sub" id="displaySub">Ventas Diarias</div>
+  <!-- ══ HEADER ══ -->
+  <header class="header">
+    <div class="header-brand">
+      <div class="logo-mark">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <div class="brand-info">
+        <span class="brand-label">Control de Negocio</span>
+        <span class="brand-name">JR Ventas</span>
       </div>
     </div>
-    <div class="header-date-btn" onclick="openModal('dateModal')">
-      <span>📅</span> <span id="btnDateText">Cargando...</span>
+    <div class="header-actions">
+      <span id="syncIndicator" class="sync-chip">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Local
+      </span>
+      <button class="header-pill" onclick="openFondoModal()" title="Efectivo del día">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span id="fondoLabel">$0.00</span>
+      </button>
+      <button class="header-pill" onclick="openDateModal()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span id="headerDate"></span>
+      </button>
     </div>
-  </div>
+  </header>
 
-  <div class="app-body">
+  <!-- ══ PAGES ══ -->
+  <div class="pages">
 
-    <div id="panel-resumen" class="app-panel active">
-      <div class="main-summary-card">
-        <div class="summary-grid">
-          <div class="summary-item">
-            <span class="summary-label">Ventas del Día</span>
-            <span class="summary-value" id="lblVentas">$0.00</span>
+    <!-- RESUMEN -->
+    <div class="page active" id="page-resumen">
+      <div class="page-header">
+        <h2 class="page-title">Resumen</h2>
+        <span class="page-date-sub" id="resumeDateSub"></span>
+      </div>
+
+      <!-- KPI 2x2 -->
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-green">
+          <div class="kpi-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
           </div>
-          <div class="summary-item">
-            <span class="summary-label">Gastos del Día</span>
-            <span class="summary-value text-red" id="lblGastos">$0.00</span>
-          </div>
-        </div>
-        <div class="summary-footer-main">
-          <span class="summary-label-main">Ganancia Bruta Real</span>
-          <span class="summary-value-main text-green" id="lblGananciaBruta">$0.00</span>
-        </div>
-      </div>
-
-      <div class="meta-container">
-        <div class="meta-box">
-          <div class="meta-info">
-            <span id="metaProgresoText">Progreso de Meta: $0.00</span>
-            <span id="metaPorcentaje">0%</span>
-          </div>
-          <div class="meta-bar-bg">
-            <div class="meta-bar-fill" id="metaBarFill"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="quick-actions-grid">
-        <div class="action-btn" onclick="openModal('ventaRapidaModal')">
-          <span class="action-btn-icon">⚡</span>
-          <span class="action-btn-text">Venta Rápida</span>
-        </div>
-        <div class="action-btn" onclick="openModal('gastoModal')">
-          <span class="action-btn-icon">💸</span>
-          <span class="action-btn-text">Nuevo Gasto</span>
-        </div>
-        <div class="action-btn" onclick="generarReporteDia()">
-          <span class="action-btn-icon">📋</span>
-          <span class="action-btn-text">Ver Reporte</span>
-        </div>
-        <div class="action-btn" onclick="openModal('configMetaModal')">
-          <span class="action-btn-icon">🎯</span>
-          <span class="action-btn-text">Ajustar Meta</span>
-        </div>
-      </div>
-
-      <div class="section-header">
-        <div class="section-title">Actividad del Día</div>
-      </div>
-      <div class="list-container" id="listaActividadDia">
-        </div>
-    </div>
-
-    <div id="panel-ventas" class="app-panel">
-      <div class="section-header">
-        <div class="section-title">Nueva Venta Estructurada</div>
-      </div>
-      <div style="padding: 0 16px 16px;">
-        <div class="form-section" style="background:#fff; padding:16px; border-radius:var(--radius-sm); border:1px solid var(--border)">
-          <div class="form-group">
-            <label class="form-label">Buscar u Organizar Producto</label>
-            <input class="form-input" type="text" id="vBuscarProd" placeholder="Escribe para buscar..." oninput="filtrarVentaProductos()">
-          </div>
-          <div id="vListaSugerencias" style="max-height:150px; overflow-y:auto; border-radius:8px; display:none; margin-bottom:10px;"></div>
-          
-          <div id="vItemsTemporales" class="list-container" style="padding:0; margin-bottom:10px;"></div>
-          
-          <button class="btn-primary" onclick="finalizarVentaEstructurada()">✓ Procesar Venta Total</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="panel-gastos" class="app-panel">
-      <div class="section-header">
-        <div class="section-title">Listado de Egresos</div>
-      </div>
-      <div class="list-container" id="listaGastosDetalle"></div>
-    </div>
-
-    <div id="panel-inventario" class="app-panel">
-      <div class="section-header">
-        <div class="section-title">Catálogo de Productos</div>
-        <div class="section-action" onclick="openModal('nuevoProductoModal')">＋ Añadir</div>
-      </div>
-      <div style="padding: 0 16px 12px;">
-        <input class="form-input" type="text" id="iBuscarProd" placeholder="🔍 Filtrar inventario..." oninput="renderInventario()">
-      </div>
-      <div class="list-container" id="listaInventario"></div>
-    </div>
-
-    <div id="panel-pedidos" class="app-panel">
-      <div class="tabs-container">
-        <button class="tab-btn active" id="tabPedPendiente" onclick="setPedidoTab('pendiente')">Pendientes</button>
-        <button class="tab-btn" id="tabPedEntregado" onclick="setPedidoTab('entregado')">Entregados</button>
-      </div>
-      <div class="section-header">
-        <div class="section-title">Encargos Especiales</div>
-        <div class="section-action" onclick="openModal('nuevoPedidoModal')">＋ Crear Pedido</div>
-      </div>
-      <div class="list-container" id="listaPedidos"></div>
-    </div>
-
-  </div>
-
-  <div class="modal-overlay" id="dateModal" onclick="overlayClose(event,'dateModal')">
-    <div class="modal">
-      <div class="modal-handle"></div>
-      <div class="modal-title">Seleccionar Fecha de Operación</div>
-      <div class="form-section">
-        <div class="form-group">
-          <input class="form-input" type="date" id="dateInput">
-        </div>
-        <button class="btn-primary" onclick="cambiarFechaManual()">✓ Cambiar Fecha</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="ventaRapidaModal" onclick="overlayClose(event,'ventaRapidaModal')">
-    <div class="modal">
-      <div class="modal-handle"></div>
-      <div class="modal-title">Venta Ejecutiva Rápida</div>
-      <div class="form-section">
-        <div class="form-group">
-          <label class="form-label">Descripción o Concepto</label>
-          <input class="form-input" type="text" id="vrConcepto" placeholder="Ej. Venta general / Misceláneo">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Monto Recibido ($)</label>
-          <input class="form-input" type="number" step="0.01" id="vrMonto" placeholder="0.00">
-        </div>
-        <button class="btn-primary" onclick="guardarVentaRapida()">✓ Registrar Transacción</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="gastoModal" onclick="overlayClose(event,'gastoModal')">
-    <div class="modal">
-      <div class="modal-handle"></div>
-      <div class="modal-title">Registrar Gasto Operativo</div>
-      <div class="form-section">
-        <div class="form-group">
-          <label class="form-label">Descripción del Gasto</label>
-          <input class="form-input" type="text" id="gConcepto" placeholder="Ej. Pago de luz / Proveedores">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Monto ($)</label>
-          <input class="form-input" type="number" step="0.01" id="gMonto" placeholder="0.00">
-        </div>
-        <button class="btn-primary" onclick="guardarGasto()">✓ Registrar Salida</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="configMetaModal" onclick="overlayClose(event,'configMetaModal')">
-    <div class="modal">
-      <div class="modal-handle"></div>
-      <div class="modal-title">Definir Meta Financiera</div>
-      <div class="form-section">
-        <div class="form-group">
-          <label class="form-label">Nueva Meta Diaria ($)</label>
-          <input class="form-input" type="number" id="cfgMetaInput" placeholder="500">
-        </div>
-        <button class="btn-primary" onclick="guardarMeta()">✓ Guardar Cambios</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="nuevoProductoModal" onclick="overlayClose(event,'nuevoProductoModal')">
-    <div class="modal">
-      <div class="modal-handle"></div>
-      <div class="modal-title">Nuevo Producto al Catálogo</div>
-      <div class="form-section">
-        <div class="form-group">
-          <label class="form-label">Nombre del Producto</label>
-          <input class="form-input" type="text" id="pNombre" placeholder="Ej. Coca Cola 2L">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Precio de Venta ($)</label>
-          <input class="form-input" type="number" step="0.01" id="pPrecio" placeholder="0.00">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Stock Inicial</label>
-          <input class="form-input" type="number" id="pStock" placeholder="0">
-        </div>
-        <button class="btn-primary" onclick="guardarProducto()">✓ Añadir a Inventario</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="stockModal" onclick="overlayClose(event,'stockModal')">
-    <div class="modal">
-      <div class="modal-handle"></div>
-      <div class="modal-title" id="stockModalTitle">Modificar Existencias</div>
-      <div class="form-section">
-        <input type="hidden" id="sId">
-        <div style="background:var(--primary-l); padding:12px; border-radius:8px; font-size:14px; text-align:center; color:var(--primary); font-weight:600; margin-bottom:4px;">
-          Stock Actual: <span id="sActual" style="font-family:'DM Mono',monospace">0</span>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Tipo de Movimiento</label>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
-            <button class="tab-btn active" id="sOpSumar" onclick="setStkOp('sumar')">➕ Abastecer</button>
-            <button class="tab-btn" id="sOpRestar" onclick="setStkOp('restar')">➖ Retirar</button>
+          <div class="kpi-body">
+            <span class="kpi-label">Ventas hoy</span>
+            <span class="kpi-value" id="totalVentas">$0.00</span>
+            <span class="kpi-sub" id="cntVentas">0 transacciones</span>
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Cantidad</label>
-          <input class="form-input" type="number" id="sCant" value="1" min="1">
+        <div class="kpi-card kpi-red">
+          <div class="kpi-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">Gastos hoy</span>
+            <span class="kpi-value" id="totalGastos">$0.00</span>
+            <span class="kpi-sub" id="cntGastos">0 egresos</span>
+          </div>
         </div>
-        <button class="btn-primary" onclick="saveStockAjuste()">✓ Aplicar Ajuste</button>
+        <div class="kpi-card kpi-amber">
+          <div class="kpi-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">Ganancia bruta</span>
+            <span class="kpi-value" id="gananciaDia">$0.00</span>
+            <span class="kpi-sub" id="gananciaBrutaSub">Mes actual</span>
+          </div>
+        </div>
+        <div class="kpi-card kpi-teal">
+          <div class="kpi-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">Ganancia neta</span>
+            <span class="kpi-value" id="gananciaNeta">$0.00</span>
+            <span class="kpi-sub" id="gananciaNetaSub">Mes actual</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Balance del día -->
+      <div class="balance-hero">
+        <div class="balance-hero-left">
+          <span class="balance-hero-label">Balance neto del día</span>
+          <span class="balance-hero-value" id="balanceNeto">$0.00</span>
+          <div class="balance-progress-wrap">
+            <div class="balance-progress-track">
+              <div class="balance-progress-fill" id="progressFill" style="width:0%"></div>
+            </div>
+            <span class="balance-progress-label" id="metaText">0% de meta</span>
+          </div>
+        </div>
+        <div class="balance-tag-wrap">
+          <span class="balance-tag" id="balanceTag">Neutro</span>
+        </div>
+      </div>
+
+      <!-- Semana -->
+      <div class="week-card">
+        <div class="week-card-header">
+          <span class="section-eyebrow">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Esta semana
+          </span>
+          <span id="semanaRango" class="week-range"></span>
+        </div>
+        <div class="week-stats">
+          <div class="week-stat">
+            <span class="week-stat-num" id="semVentas" style="color:var(--green)">$0</span>
+            <span class="week-stat-label">Ventas</span>
+          </div>
+          <div class="week-stat-divider"></div>
+          <div class="week-stat">
+            <span class="week-stat-num" id="semGastos" style="color:var(--red)">$0</span>
+            <span class="week-stat-label">Gastos</span>
+          </div>
+          <div class="week-stat-divider"></div>
+          <div class="week-stat">
+            <span class="week-stat-num" id="semBalance">$0</span>
+            <span class="week-stat-label">Balance</span>
+          </div>
+        </div>
+        <!-- Bars -->
+        <div class="week-bars" id="semanaDays"></div>
+        <!-- Semana cards fila -->
+        <div class="week-sub-row">
+          <div class="week-sub-item">
+            <span class="week-sub-label">Ventas semana</span>
+            <span class="week-sub-val" id="semVentasCard" style="color:var(--green)">$0.00</span>
+            <span class="week-sub-count" id="cntSemVentas">0 transacciones</span>
+          </div>
+          <div class="week-sub-sep"></div>
+          <div class="week-sub-item">
+            <span class="week-sub-label">Gastos semana</span>
+            <span class="week-sub-val" id="semGastosCard" style="color:var(--red)">$0.00</span>
+            <span class="week-sub-count" id="cntSemGastos">0 egresos</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fondo inicial -->
+      <div class="info-row-card" id="fondoInicialCard">
+        <div class="info-row-icon" style="background:rgba(124,58,237,0.12)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        </div>
+        <div class="info-row-body">
+          <span class="info-row-label">Capital inicial del negocio</span>
+          <span class="info-row-value" id="fondoInicialDisplay" style="color:#7c3aed">—</span>
+          <span class="info-row-sub" id="fondoInicialFecha">Aún no registrado</span>
+        </div>
+        <div id="fondoInicialAccion">
+          <button class="btn-sm btn-primary" onclick="openFondoInicialModal()">Registrar</button>
+        </div>
+      </div>
+
+      <!-- Pedidos del día -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            Pedidos especiales hoy
+          </span>
+          <span class="mono-sm" id="totalPedidosDia">$0.00</span>
+        </div>
+        <div class="pedidos-resumen">
+          <div class="ped-res-row">
+            <div class="ped-res-dot" style="background:#e8a020"></div>
+            <span class="ped-res-name">Pollo Rico</span>
+            <span class="ped-res-val mono-sm" id="sumPolloRico" style="color:#e8a020">$0.00</span>
+          </div>
+          <div class="ped-res-row">
+            <div class="ped-res-dot" style="background:#d44f2e"></div>
+            <span class="ped-res-name">Pollo Indio</span>
+            <span class="ped-res-val mono-sm" id="sumPolloIndio" style="color:#d44f2e">$0.00</span>
+          </div>
+          <div class="ped-res-row last">
+            <div class="ped-res-dot" style="background:#c4860a"></div>
+            <span class="ped-res-name">Sello de Oro</span>
+            <span class="ped-res-val mono-sm" id="sumSelloOro" style="color:#c4860a">$0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mini gráfico distribución -->
+      <div class="card">
+        <span class="card-title" style="margin-bottom:14px;display:block">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Distribución financiera
+        </span>
+        <div class="mini-chart">
+          <div class="mini-bar-wrap"><div class="mini-bar" id="bVentas" style="background:var(--green);height:4px"></div><span class="mini-bar-label">Ventas</span></div>
+          <div class="mini-bar-wrap"><div class="mini-bar" id="bGastos" style="background:var(--red);height:4px"></div><span class="mini-bar-label">Gastos</span></div>
+          <div class="mini-bar-wrap"><div class="mini-bar" id="bPollo" style="background:#e8a020;height:4px"></div><span class="mini-bar-label">P.Rico</span></div>
+          <div class="mini-bar-wrap"><div class="mini-bar" id="bIndio" style="background:#d44f2e;height:4px"></div><span class="mini-bar-label">P.Indio</span></div>
+          <div class="mini-bar-wrap"><div class="mini-bar" id="bSello" style="background:#c4860a;height:4px"></div><span class="mini-bar-label">S.Oro</span></div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="modal-overlay" id="nuevoPedidoModal" onclick="overlayClose(event,'nuevoPedidoModal')">
-    <div class="modal">
-      <div class="modal-handle"></div>
-      <div class="modal-title">Registrar Nuevo Encargo</div>
-      <div class="form-section" style="max-height:75vh; overflow-y:auto;">
-        <div class="form-group">
-          <label class="form-label">Cliente</label>
-          <input class="form-input" type="text" id="pedCliente" placeholder="Nombre del cliente">
+    <!-- VENTAS -->
+    <div class="page" id="page-ventas">
+      <div class="page-header">
+        <h2 class="page-title">Ventas <span class="count-badge" id="badgeVentas">0</span></h2>
+      </div>
+      <div class="tab-group">
+        <button class="tab active" id="ventaFiltroLista" onclick="setVentaFiltro('lista')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Lista
+        </button>
+        <button class="tab" id="ventaFiltroRanking" onclick="setVentaFiltro('ranking')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+          Más vendidos
+        </button>
+      </div>
+      <div id="listaVentas"></div>
+    </div>
+
+    <!-- GASTOS -->
+    <div class="page" id="page-gastos">
+      <div class="page-header">
+        <h2 class="page-title">Gastos <span class="count-badge" id="badgeGastos">0</span></h2>
+      </div>
+      <div id="gastosCatResumen"></div>
+      <div id="listaGastos"></div>
+    </div>
+
+    <!-- PEDIDOS -->
+    <div class="page" id="page-pedidos">
+      <div class="page-header">
+        <h2 class="page-title">Pedidos especiales</h2>
+      </div>
+      <!-- Resumen del día -->
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-header" style="margin-bottom:10px">
+          <div>
+            <div class="card-title">Total del día</div>
+            <div class="card-sub" id="pedidosDiaCnt">0 pedidos activos</div>
+          </div>
+          <span class="mono-lg" id="pedidosDiaTotal">$0.00</span>
         </div>
-        <div class="form-group">
-          <label class="form-label">Descripción del Pedido</label>
-          <input class="form-input" type="text" id="pedDetalle" placeholder="Detalle de lo solicitado">
+        <div class="pedidos-proveedor-row">
+          <div class="ped-prov">
+            <span class="ped-prov-name" style="color:#e8a020">Pollo Rico</span>
+            <span class="ped-prov-val mono-sm" id="pedDiaPR">$0.00</span>
+          </div>
+          <div class="ped-prov-sep"></div>
+          <div class="ped-prov">
+            <span class="ped-prov-name" style="color:var(--red)">Pollo Indio</span>
+            <span class="ped-prov-val mono-sm" id="pedDiaPI">$0.00</span>
+          </div>
+          <div class="ped-prov-sep"></div>
+          <div class="ped-prov">
+            <span class="ped-prov-name" style="color:#c4860a">Sello de Oro</span>
+            <span class="ped-prov-val mono-sm" id="pedDiaSO">$0.00</span>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Total del Pedido ($)</label>
-          <input class="form-input" type="number" step="0.01" id="pedTotal" placeholder="0.00">
+      </div>
+      <div class="tab-group">
+        <button class="tab active" id="tabPend" onclick="setPedidoTab('pendiente')">Pendientes</button>
+        <button class="tab" id="tabDone" onclick="setPedidoTab('completado')">Completados</button>
+        <button class="tab" id="tabCanc" onclick="setPedidoTab('cancelado')">Cancelados</button>
+      </div>
+      <div id="listaPedidos"></div>
+    </div>
+
+    <!-- INVENTARIO -->
+    <div class="page" id="page-inventario">
+      <div class="page-header">
+        <h2 class="page-title">Inventario</h2>
+        <button class="btn-sm btn-primary" onclick="openProductoModal(null)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Producto
+        </button>
+      </div>
+      <div class="info-row-card" style="margin-bottom:12px">
+        <div class="info-row-icon" style="background:rgba(29,158,117,0.12)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
         </div>
-        <div class="form-group">
-          <label class="form-label">Adelanto / Abono Inicial ($)</label>
-          <input class="form-input" type="number" step="0.01" id="pedAbono" value="0" placeholder="0.00">
+        <div class="info-row-body">
+          <span class="info-row-label">Total invertido en stock</span>
+          <span class="info-row-value mono-lg" id="invTotalInvertido" style="color:var(--primary-light)">$0.00</span>
         </div>
-        <button class="btn-primary" onclick="guardarPedido()">✓ Crear Encargo</button>
+        <span class="count-badge" id="invProductosCnt">0</span>
+      </div>
+      <div class="tab-group" style="margin-bottom:12px">
+        <button class="tab active" id="invFiltroTodos" onclick="setInvFiltro('todos')">Todos</button>
+        <button class="tab" id="invFiltroAlto" onclick="setInvFiltro('alto')" style="color:var(--green)">Alto</button>
+        <button class="tab" id="invFiltroMedio" onclick="setInvFiltro('medio')" style="color:var(--amber)">Medio</button>
+        <button class="tab" id="invFiltroBajo" onclick="setInvFiltro('bajo')" style="color:var(--red)">Bajo</button>
+      </div>
+      <div id="listaInventario"></div>
+    </div>
+
+    <!-- REPORTES -->
+    <div class="page" id="page-reportes">
+      <div class="page-header">
+        <h2 class="page-title">Reportes</h2>
+      </div>
+
+      <div class="rpt-group">
+        <div class="rpt-group-header" style="--gc:#1d9e75">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Ventas
+        </div>
+        <div class="rpt-tiles">
+          <button class="rpt-tile" onclick="generarReporte('ventasDiario')" style="--tc:#1d9e75"><span class="rpt-period">Día</span><span class="rpt-name">Ventas</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <button class="rpt-tile" onclick="generarReporte('ventasSemanal')" style="--tc:#1d9e75"><span class="rpt-period">Semana</span><span class="rpt-name">Ventas</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <button class="rpt-tile" onclick="generarReporte('ventasMensual')" style="--tc:#1d9e75"><span class="rpt-period">Mes</span><span class="rpt-name">Ventas</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+      </div>
+
+      <div class="rpt-group">
+        <div class="rpt-group-header" style="--gc:#e8a020">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          Pedidos
+        </div>
+        <div class="rpt-tiles">
+          <button class="rpt-tile" onclick="generarReporte('pedidosDiario')" style="--tc:#e8a020"><span class="rpt-period">Día</span><span class="rpt-name">Pedidos</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <button class="rpt-tile" onclick="generarReporte('pedidosSemanal')" style="--tc:#e8a020"><span class="rpt-period">Semana</span><span class="rpt-name">Pedidos</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <button class="rpt-tile" onclick="generarReporte('pedidosMensual')" style="--tc:#e8a020"><span class="rpt-period">Mes</span><span class="rpt-name">Pedidos</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+      </div>
+
+      <div class="rpt-group">
+        <div class="rpt-group-header" style="--gc:#2563eb">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          Inventario
+        </div>
+        <div class="rpt-tiles">
+          <button class="rpt-tile" onclick="generarReporte('inventario')" style="--tc:#2563eb"><span class="rpt-period">Hoy</span><span class="rpt-name">Stock</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <button class="rpt-tile" onclick="generarReporte('inventarioSemanal')" style="--tc:#2563eb"><span class="rpt-period">Semana</span><span class="rpt-name">Inventario</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <button class="rpt-tile" onclick="generarReporte('inventarioMensual')" style="--tc:#2563eb"><span class="rpt-period">Mes</span><span class="rpt-name">Inventario</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+      </div>
+
+      <div class="rpt-group">
+        <div class="rpt-group-header" style="--gc:#0d7a5a">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          General
+        </div>
+        <div class="rpt-tiles">
+          <button class="rpt-tile rpt-tile-dark" onclick="generarReporte('diario')" style="--tc:#0d7a5a"><span class="rpt-period">Día</span><span class="rpt-name">General</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <button class="rpt-tile rpt-tile-dark" onclick="generarReporte('semanal')" style="--tc:#0d7a5a"><span class="rpt-period">Semana</span><span class="rpt-name">General</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <button class="rpt-tile rpt-tile-dark" onclick="generarReporte('mensual')" style="--tc:#0d7a5a"><span class="rpt-period">Mes</span><span class="rpt-name">General</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+      </div>
+
+      <p class="rpt-hint">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Al abrir el reporte, toca <strong>Guardar como PDF</strong> en la vista de impresión.
+      </p>
+
+      <!-- Respaldo -->
+      <div class="section-label">Respaldo de datos</div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="tool-row" onclick="migrarDatos()">
+          <div class="tool-icon" style="background:rgba(124,58,237,0.1)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </div>
+          <div class="tool-info"><div class="tool-name">Migrar datos históricos</div><div class="tool-desc">Clasifica gastos y corrige ganancia neta</div></div>
+          <button class="btn-sm" style="background:#7c3aed;color:#fff" onclick="event.stopPropagation();migrarDatos()">Migrar</button>
+        </div>
+        <div class="tool-row">
+          <div class="tool-icon" style="background:rgba(37,99,235,0.1)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </div>
+          <div class="tool-info"><div class="tool-name">Sincronizar ahora</div><div class="tool-desc">Fuerza la sincronización con Firebase</div></div>
+          <button class="btn-sm" style="background:#2563eb;color:#fff" onclick="_fbWrite();toast('☁ Sincronizando...')">Sync</button>
+        </div>
+        <div class="tool-row">
+          <div class="tool-icon" style="background:rgba(29,158,117,0.1)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </div>
+          <div class="tool-info"><div class="tool-name">Exportar datos</div><div class="tool-desc">Descarga un .json con todos tus registros</div></div>
+          <button class="btn-sm" style="background:var(--green);color:#fff" onclick="exportarDatos()">Exportar</button>
+        </div>
+        <div class="tool-row" style="border-bottom:none">
+          <div class="tool-icon" style="background:rgba(232,160,32,0.1)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <div class="tool-info"><div class="tool-name">Importar datos</div><div class="tool-desc">Restaura desde un archivo .json exportado</div></div>
+          <label class="btn-sm" style="background:var(--amber);color:#fff">Importar<input type="file" accept=".json" onchange="importarDatos(event)" style="display:none"></label>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="nav-bar">
-    <div class="nav-item active" id="nav-resumen" onclick="navegar('resumen')">
-      <span class="nav-icon">📊</span>
-      <span class="nav-text">Resumen</span>
+    <!-- ENCARGOS -->
+    <div class="page" id="page-encargos">
+      <div class="page-header">
+        <h2 class="page-title">Encargos</h2>
+        <button class="btn-sm btn-primary" onclick="openEncargoModal(null)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Encargo
+        </button>
+      </div>
+      <div id="listaEncargos"></div>
     </div>
-    <div class="nav-item" id="nav-ventas" onclick="navegar('ventas')">
-      <span class="nav-icon">🛒</span>
-      <span class="nav-text">Vender</span>
-    </div>
-    <div class="nav-item" id="nav-gastos" onclick="navegar('gastos')">
-      <span class="nav-icon">📉</span>
-      <span class="nav-text">Gastos</span>
-    </div>
-    <div class="nav-item" id="nav-inventario" onclick="navegar('inventario')">
-      <span class="nav-icon">📦</span>
-      <span class="nav-text">Productos</span>
-    </div>
-    <div class="nav-item" id="nav-pedidos" onclick="navegar('pedidos')">
-      <span class="nav-icon">⏰</span>
-      <span class="nav-text">Pedidos</span>
-    </div>
-  </div>
 
+    <!-- HISTORIAL -->
+    <div class="page" id="page-historial">
+      <div class="page-header">
+        <h2 class="page-title">Historial</h2>
+      </div>
+      <div id="listaHistorial"></div>
+    </div>
+
+  </div><!-- /pages -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" onclick="showPage('resumen',this)" data-label="Inicio">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Inicio</span>
+    </button>
+    <button class="nav-btn" onclick="showPage('ventas',this)" data-label="Ventas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span>Ventas</span>
+    </button>
+    <button class="nav-btn" onclick="showPage('gastos',this)" data-label="Gastos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      <span>Gastos</span>
+    </button>
+    <button class="nav-btn" onclick="showPage('pedidos',this)" data-label="Pedidos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      <span>Pedidos</span>
+    </button>
+    <button class="nav-btn" onclick="showPage('inventario',this)" data-label="Stock">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      <span>Stock</span>
+    </button>
+    <button class="nav-btn" onclick="showPage('encargos',this)" data-label="Encargos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+      <span>Encargos</span>
+    </button>
+    <button class="nav-btn" onclick="showPage('historial',this)" data-label="Historial">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>
+      <span>Historial</span>
+    </button>
+    <button class="nav-btn" onclick="showPage('reportes',this)" data-label="Reportes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>Reportes</span>
+    </button>
+  </nav>
 </div>
 
-<script>
-// VARIABLES DE ESTADO LOGICO
-var META = 500;
-var stkOpActual = 'sumar';
-var pedidoTab = 'pendiente';
-var currentDate = new Date();
-var currentPage = 'resumen';
-var data = {};      
-var productos = []; 
-var ventaItems = []; 
+<!-- FAB -->
+<button class="fab" id="fabBtn" onclick="openAddModal()">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
 
-// CONFIGURACIÓN DE TU BASE DE DATOS FIREBASE
-var firebaseConfig = {
-  apiKey: "AIzaSyA3Y95NMaWUpKGjoVJZ3Mdc9MA-7p2QWPw",
-  authDomain: "jrventa-72523.firebaseapp.com",
-  projectId: "jrventa-72523",
-  storageBucket: "jrventa-72523.firebasestorage.app",
-  messagingSenderId: "293349390874",
-  appId: "1:293349390874:web:442a06af6f0e405bc32fa3"
-};
+<!-- ═══ MODAL: FONDO INICIAL ═══ -->
+<div class="modal-overlay" id="fondoInicialModal" onclick="overlayClose(event,'fondoInicialModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Capital inicial del negocio</div>
+    <div class="form-section">
+      <div class="info-banner">⚠ Este dato es histórico y no se podrá modificar después de guardarlo. Registra el monto exacto con el que abriste el negocio.</div>
+      <div class="field-group">
+        <label class="field-label">Monto ($)</label>
+        <input class="field-input" type="number" id="fondoInicialInput" placeholder="Ej: 302.50" step="0.01" min="0">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Fecha de apertura</label>
+        <input class="field-input" type="date" id="fondoInicialDate">
+      </div>
+      <button class="btn-block btn-primary" onclick="saveFondoInicial()">Registrar (permanente)</button>
+    </div>
+  </div>
+</div>
 
-// Inicialización
-firebase.initializeApp(firebaseConfig);
-var db = firebase.firestore();
+<!-- ═══ MODAL: EFECTIVO DEL DÍA ═══ -->
+<div class="modal-overlay" id="fondoModal" onclick="overlayClose(event,'fondoModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Efectivo del día</div>
+    <div class="form-section">
+      <div class="field-group">
+        <label class="field-label">Monto ($)</label>
+        <input class="field-input" type="number" id="fondoInput" placeholder="0.00" step="0.01" min="0">
+      </div>
+      <button class="btn-block btn-primary" onclick="saveFondo()">Guardar</button>
+    </div>
+  </div>
+</div>
 
-// Formateadores de fecha útiles
-function getFechaKey(date) {
-  var d = date.getDate();
-  var m = date.getMonth() + 1;
-  var y = date.getFullYear();
-  return y + '-' + (m < 10 ? '0' + m : m) + '-' + (d < 10 ? '0' + d : d);
-}
+<!-- ═══ MODAL: DETALLE ═══ -->
+<div class="modal-overlay" id="detalleVentaModal" onclick="overlayClose(event,'detalleVentaModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Detalle</div>
+    <div class="form-section" id="detalleVentaBody"></div>
+  </div>
+</div>
 
-function formatFechaEspanol(date) {
-  var opciones = { weekday: 'long', day: 'numeric', month: 'long' };
-  var str = date.toLocaleDateString('es-ES', opciones);
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
+<!-- ═══ MODAL: ENCARGO ═══ -->
+<div class="modal-overlay" id="encargoModal" onclick="overlayClose(event,'encargoModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="encargoModalTitle">Nuevo encargo</div>
+    <div class="form-section">
+      <input type="hidden" id="encargoId">
+      <div class="field-group">
+        <label class="field-label">Cliente</label>
+        <input class="field-input" type="text" id="encargoCliente" placeholder="Nombre del cliente">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Tipo de productos</label>
+        <input class="field-input" type="text" id="encargoProductos" placeholder="Ej: Pollo entero, tamales, etc.">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Fecha de entrega</label>
+        <input class="field-input" type="date" id="encargoFecha">
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Costo ($)</label>
+          <input class="field-input" type="number" id="encargoCosto" placeholder="0.00" step="0.01" min="0">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Anticipo ($)</label>
+          <input class="field-input" type="number" id="encargoAnticipo" placeholder="0.00" step="0.01" min="0">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Estado</label>
+        <select class="field-input" id="encargoEstado">
+          <option value="pendiente">⏳ Pendiente</option>
+          <option value="listo">✅ Listo para entregar</option>
+          <option value="entregado">📦 Entregado</option>
+          <option value="cancelado">❌ Cancelado</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Notas <span class="field-opt">(opcional)</span></label>
+        <input class="field-input" type="text" id="encargoNotas" placeholder="Detalles adicionales...">
+      </div>
+      <button class="btn-block btn-primary" onclick="saveEncargo()">Guardar encargo</button>
+    </div>
+  </div>
+</div>
 
-// INICIALIZACIÓN DE LA APP AL CARGAR
-window.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('dateInput').value = getFechaKey(currentDate);
-  actualizarUIFecha();
-  escucharDatosDelDia();
-  escucharInventarioGlobal();
-});
+<!-- ═══ MODAL: AGREGAR REGISTRO ═══ -->
+<div class="modal-overlay" id="addModal" onclick="overlayClose(event,'addModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nuevo registro</div>
+    <div class="form-section">
+      <div class="field-group">
+        <label class="field-label">Tipo</label>
+        <div class="type-toggle">
+          <button class="type-btn active" id="tBtnVenta" onclick="setTipo('venta')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+            Venta
+          </button>
+          <button class="type-btn" id="tBtnGasto" onclick="setTipo('gasto')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/></svg>
+            Gasto
+          </button>
+          <button class="type-btn" id="tBtnPedido" onclick="setTipo('pedido')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            Pedido
+          </button>
+        </div>
+      </div>
 
-function actualizarUIFecha() {
-  var key = getFechaKey(currentDate);
-  document.getElementById('btnDateText').textContent = key;
-  document.getElementById('displaySub').textContent = formatFechaEspanol(currentDate);
-}
+      <!-- VENTA -->
+      <div id="ventaProductoWrap" class="field-group">
+        <label class="field-label">Producto del inventario <span class="field-opt">(opcional)</span></label>
+        <select class="field-input" id="ventaProductoSel" onchange="onProductoSelChange()">
+          <option value="">— Seleccionar producto —</option>
+        </select>
+        <div id="ventaStockInfo" style="display:none;font-size:11px;color:var(--text-muted);margin-top:5px;padding:7px 10px;background:var(--surface2);border-radius:6px;line-height:1.5"></div>
+      </div>
 
-function navegar(page) {
-  currentPage = page;
-  document.querySelectorAll('.app-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  
-  document.getElementById('panel-' + page).classList.add('active');
-  document.getElementById('nav-' + page).classList.add('active');
-}
+      <!-- GASTO -->
+      <div id="gastoWrap" style="display:none" class="field-group">
+        <label class="field-label">Categoría del gasto</label>
+        <select class="field-input" id="gastoCat">
+          <option value="pasaje">🚌 Pasajes / Transporte</option>
+          <option value="alimentacion">🍽 Alimentación</option>
+          <option value="alcaldia">🏛 Impuesto Alcaldía</option>
+          <option value="electricidad">⚡ Energía Eléctrica</option>
+          <option value="otro">📋 Otro gasto operativo</option>
+        </select>
+      </div>
 
-function openModal(id) {
-  document.getElementById(id).style.display = 'flex';
-}
+      <!-- PEDIDO -->
+      <div id="pedidoWrap" style="display:none" class="field-group">
+        <label class="field-label">Proveedor del pedido</label>
+        <select class="field-input" id="pedidoTipo">
+          <option value="Pollo Rico">Pollo Rico</option>
+          <option value="Pollo Indio">Pollo Indio</option>
+          <option value="Sello de Oro">Sello de Oro</option>
+        </select>
+      </div>
 
-function closeModal(id) {
-  document.getElementById(id).style.display = 'none';
-}
+      <!-- Pedido producto -->
+      <div style="margin-bottom:8px" class="field-group">
+        <label class="field-label">Producto del pedido <span class="field-opt">(opcional)</span></label>
+        <select class="field-input" id="pedidoProductoSel" onchange="onPedidoProductoChange()">
+          <option value="">— Sin producto específico —</option>
+        </select>
+        <div id="pedidoStockInfo" style="display:none;font-size:11px;color:var(--text-muted);margin-top:5px;padding:7px 10px;background:var(--surface2);border-radius:6px"></div>
+      </div>
 
-function overlayClose(e, id) {
-  if (e.target.id === id) closeModal(id);
-}
+      <!-- Items pedido -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <label class="field-label" style="margin:0">Productos del pedido</label>
+        <button type="button" class="btn-sm" style="background:var(--amber);color:#fff" onclick="agregarItemPedido()">+ Agregar</button>
+      </div>
+      <div id="pedidoItemsList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+      <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Agrega cada producto por separado. El total se calcula automáticamente.</p>
 
-// ══════════════════════════════════════════
-// CORRECCIÓN MATEMÁTICA Y FLUJO DE DATOS
-// ══════════════════════════════════════════
-function escucharDatosDelDia() {
-  var key = getFechaKey(currentDate);
-  
-  // Escuchar Colección Ventas
-  db.collection("ventas").where("fecha", "==", key)
-    .onSnapshot(function(snapshot) {
-      if(!data[key]) data[key] = { ventas: [], gastos: [], pedidos: [] };
-      data[key].ventas = [];
-      snapshot.forEach(doc => {
-        var d = doc.data(); d.id = doc.id;
-        data[key].ventas.push(d);
-      });
-      procesarYCalcularTodo(key);
-    });
+      <div class="field-group">
+        <label class="field-label">Descripción</label>
+        <input class="field-input" type="text" id="fDesc" placeholder="Ej: Almuerzo, Transporte...">
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Cantidad</label>
+          <input class="field-input" type="number" id="fCant" placeholder="1" min="0.01" step="0.01" value="1" oninput="onCantChange()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Monto ($)</label>
+          <input class="field-input" type="number" id="fMonto" placeholder="0.00" step="0.01" min="0.01">
+        </div>
+      </div>
 
-  // Escuchar Colección Gastos
-  db.collection("gastos").where("fecha", "==", key)
-    .onSnapshot(function(snapshot) {
-      if(!data[key]) data[key] = { ventas: [], gastos: [], pedidos: [] };
-      data[key].gastos = [];
-      snapshot.forEach(doc => {
-        var d = doc.data(); d.id = doc.id;
-        data[key].gastos.push(d);
-      });
-      procesarYCalcularTodo(key);
-    });
-    
-  // Escuchar Colección Pedidos
-  db.collection("pedidos")
-    .onSnapshot(function(snapshot) {
-      if(!data[key]) data[key] = { ventas: [], gastos: [], pedidos: [] };
-      data[key].pedidos = [];
-      snapshot.forEach(doc => {
-        var d = doc.data(); d.id = doc.id;
-        data[key].pedidos.push(d);
-      });
-      renderPedidos();
-    });
-}
+      <!-- Multi-producto venta -->
+      <div id="ventaItemsWrap" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <label class="field-label" style="margin:0">Productos en esta venta</label>
+          <button type="button" class="btn-sm btn-primary" onclick="agregarItemVenta()">+ Agregar</button>
+        </div>
+        <div id="ventaItemsList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+        <p style="font-size:11px;color:var(--text-muted)">El monto total se calcula automáticamente.</p>
+      </div>
 
-function procesarYCalcularTodo(fechaKey) {
-  var dia = data[fechaKey] || { ventas: [], gastos: [] };
-  var tVentas = 0;
-  var tGastos = 0;
+      <button class="btn-block btn-primary" onclick="saveRecord()" style="margin-top:8px">Guardar registro</button>
+    </div>
+  </div>
+</div>
 
-  dia.ventas.forEach(v => tVentas += parseFloat(v.monto || 0));
-  dia.gastos.forEach(g => tGastos += parseFloat(g.monto || 0));
+<!-- ═══ MODAL: PRODUCTO ═══ -->
+<div class="modal-overlay" id="productoModal" onclick="overlayClose(event,'productoModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="productoModalTitle">Nuevo producto</div>
+    <div class="form-section">
+      <input type="hidden" id="pId">
+      <div class="field-group">
+        <label class="field-label">Nombre del producto</label>
+        <input class="field-input" type="text" id="pNombre" placeholder="Ej: Arroz, Pollo, Refresco...">
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Cantidad inicial</label>
+          <input class="field-input" type="number" id="pCantidad" placeholder="0" min="0">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Unidad</label>
+          <select class="field-input" id="pUnidad">
+            <option value="unidad">unidad</option>
+            <option value="lb">lb</option>
+            <option value="kg">kg</option>
+            <option value="litro">litro</option>
+            <option value="caja">caja</option>
+            <option value="bolsa">bolsa</option>
+            <option value="docena">docena</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Precio costo ($)</label>
+          <input class="field-input" type="number" id="pPrecioCosto" placeholder="0.00" step="0.01" min="0">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Precio venta ($)</label>
+          <input class="field-input" type="number" id="pPrecioVenta" placeholder="0.00" step="0.01" min="0">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Fecha de ingreso</label>
+        <input class="field-input" type="date" id="pFecha">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Notas <span class="field-opt">(opcional)</span></label>
+        <input class="field-input" type="text" id="pNotas" placeholder="Proveedor, lote, etc.">
+      </div>
+      <button class="btn-block btn-primary" onclick="saveProducto()">Guardar producto</button>
+    </div>
+  </div>
+</div>
 
-  // Fórmula Exacta de la Ganancia Bruta Real
-  var gananciaBruta = tVentas - tGastos;
+<!-- ═══ MODAL: AJUSTE STOCK ═══ -->
+<div class="modal-overlay" id="stockModal" onclick="overlayClose(event,'stockModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="stockModalTitle">Ajustar stock</div>
+    <div class="form-section">
+      <input type="hidden" id="sId">
+      <div class="info-banner">Stock actual: <strong id="sActual" style="font-family:'JetBrains Mono',monospace"></strong></div>
+      <div class="field-group">
+        <label class="field-label">Operación</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button class="type-btn active" id="sOpSumar" onclick="setStkOp('sumar')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Sumar
+          </button>
+          <button class="type-btn" id="sOpRestar" onclick="setStkOp('restar')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Restar
+          </button>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Cantidad</label>
+        <input class="field-input" type="number" id="sCant" placeholder="0" min="1" value="1">
+      </div>
+      <button class="btn-block btn-primary" onclick="saveStockAjuste()">Aplicar ajuste</button>
+    </div>
+  </div>
+</div>
 
-  // Actualizar UI Financiera
-  document.getElementById('lblVentas').textContent = '$' + tVentas.toFixed(2);
-  document.getElementById('lblGastos').textContent = '$' + tGastos.toFixed(2);
-  
-  var lblGB = document.getElementById('lblGananciaBruta');
-  lblGB.textContent = '$' + gananciaBruta.toFixed(2);
-  lblGB.className = gananciaBruta >= 0 ? 'summary-value-main text-green' : 'summary-value-main text-red';
+<!-- ═══ MODAL: FECHA ═══ -->
+<div class="modal-overlay" id="dateModal" onclick="overlayClose(event,'dateModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Seleccionar fecha</div>
+    <div class="form-section">
+      <input class="field-input" type="date" id="dateInput" style="font-size:16px;text-align:center">
+      <button class="btn-block btn-primary" onclick="applyDate()">Aplicar</button>
+    </div>
+  </div>
+</div>
 
-  // Render Metas
-  var pct = Math.min((tVentas / META) * 100, 100);
-  document.getElementById('metaProgresoText').textContent = 'Progreso de Meta: $' + tVentas.toFixed(2) + ' / $' + META.toFixed(2);
-  document.getElementById('metaPorcentaje').textContent = pct.toFixed(0) + '%';
-  document.getElementById('metaBarFill').style.width = pct + '%';
+<div class="toast" id="notif"></div>
+<div id="rpt-frame"></div>
 
-  // Render listas de Actividad Diario y Egresos
-  renderActividadDelDia(dia);
-}
-
-function renderActividadDelDia(dia) {
-  var container = document.getElementById('listaActividadDia');
-  var containerGastos = document.getElementById('listaGastosDetalle');
-  container.innerHTML = '';
-  containerGastos.innerHTML = '';
-
-  // Inyectar Ventas
-  dia.ventas.forEach(v => {
-    var item = document.createElement('div');
-    item.className = 'card-item';
-    item.innerHTML = `<div class="card-left"><div class="card-title">${v.concepto || 'Venta del negocio'}</div><div class="card-subtitle">Ingreso Directo</div></div>
-                      <div class="card-right"><div class="card-price text-green">+ $${parseFloat(v.monto).toFixed(2)}</div><button style="border:none;background:transparent;color:var(--text3);font-size:11px" onclick="eliminarTransaccion('ventas','${v.id}')">Eliminar</button></div>`;
-    container.appendChild(item);
-  });
-
-  // Inyectar Gastos
-  dia.gastos.forEach(g => {
-    var item = document.createElement('div');
-    item.className = 'card-item';
-    var inner = `<div class="card-left"><div class="card-title">${g.concepto}</div><div class="card-subtitle">Egreso registrado</div></div>
-                      <div class="card-right"><div class="card-price text-red">- $${parseFloat(g.monto).toFixed(2)}</div><button style="border:none;background:transparent;color:var(--text3);font-size:11px" onclick="eliminarTransaccion('gastos','${g.id}')">Eliminar</button></div>`;
-    item.innerHTML = inner;
-    container.appendChild(item.cloneNode(true));
-    containerGastos.appendChild(item);
-  });
-}
-
-// OPERACIONES FIRESTORE (TRANSACCIONES)
-function guardarVentaRapida() {
-  var con = document.getElementById('vrConcepto').value || 'Venta Directa';
-  var mon = parseFloat(document.getElementById('vrMonto').value || 0);
-  if(mon <= 0) return alert('Ingresa un monto válido');
-
-  db.collection("ventas").add({
-    concepto: con,
-    monto: mon,
-    fecha: getFechaKey(currentDate),
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(() => {
-    closeModal('ventaRapidaModal');
-    document.getElementById('vrConcepto').value = '';
-    document.getElementById('vrMonto').value = '';
-  });
-}
-
-function guardarGasto() {
-  var con = document.getElementById('gConcepto').value;
-  var mon = parseFloat(document.getElementById('gMonto').value || 0);
-  if(!con || mon <= 0) return alert('Completa los campos correctamente');
-
-  db.collection("gastos").add({
-    concepto: con,
-    monto: mon,
-    fecha: getFechaKey(currentDate),
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(() => {
-    closeModal('gastoModal');
-    document.getElementById('gConcepto').value = '';
-    document.getElementById('gMonto').value = '';
-  });
-}
-
-function eliminarTransaccion(col, id) {
-  if(confirm('¿Seguro que deseas remover este registro operativo?')) {
-    db.collection(col).doc(id).delete();
-  }
-}
-
-function cambiarFechaManual() {
-  var val = document.getElementById('dateInput').value;
-  if(val) {
-    var partes = val.split('-');
-    currentDate = new Date(partes[0], partes[1] - 1, partes[2]);
-    actualizarUIFecha();
-    escucharDatosDelDia();
-    closeModal('dateModal');
-  }
-}
-
-function guardarMeta() {
-  var val = parseFloat(document.getElementById('cfgMetaInput').value || 500);
-  if(val > 0) {
-    META = val;
-    procesarYCalcularTodo(getFechaKey(currentDate));
-    closeModal('configMetaModal');
-  }
-}
-
-// ══════════════════════════════════════════
-// MÓDULO DE INVENTARIO Y ADICIÓN
-// ══════════════════════════════════════════
-function escucharInventarioGlobal() {
-  db.collection("productos").orderBy("nombre")
-    .onSnapshot(snapshot => {
-      productos = [];
-      snapshot.forEach(doc => {
-        var d = doc.data(); d.id = doc.id;
-        productos.push(d);
-      });
-      renderInventario();
-    });
-}
-
-function renderInventario() {
-  var container = document.getElementById('listaInventario');
-  var query = document.getElementById('iBuscarProd').value.toLowerCase();
-  container.innerHTML = '';
-
-  productos.forEach(p => {
-    if(p.nombre.toLowerCase().indexOf(query) === -1) return;
-    
-    var card = document.createElement('div');
-    card.className = 'card-item';
-    card.innerHTML = `<div class="card-left"><div class="card-title">${p.nombre}</div><div class="card-subtitle">Stock: ${p.stock || 0} u.</div></div>
-                      <div class="card-right"><div class="card-price">$${parseFloat(p.precio).toFixed(2)}</div>
-                      <button style="border:none;background:var(--primary-l);color:var(--primary);font-weight:600;padding:4px 8px;border-radius:4px;font-size:11px" onclick="abrirAjusteStock('${p.id}', ${p.stock || 0}, '${p.nombre}')">Ajustar Stock</button></div>`;
-    container.appendChild(card);
-  });
-}
-
-function guardarProducto() {
-  var nom = document.getElementById('pNombre').value;
-  var pre = parseFloat(document.getElementById('pPrecio').value || 0);
-  var stk = parseInt(document.getElementById('pStock').value || 0);
-
-  if(!nom || pre <= 0) return alert('Datos de producto incorrectos');
-
-  db.collection("productos").add({ nombre: nom, precio: pre, stock: stk })
-    .then(() => {
-      closeModal('nuevoProductoModal');
-      document.getElementById('pNombre').value = '';
-      document.getElementById('pPrecio').value = '';
-      document.getElementById('pStock').value = '';
-    });
-}
-
-function abrirAjusteStock(id, actual, nombre) {
-  document.getElementById('sId').value = id;
-  document.getElementById('sActual').textContent = actual;
-  document.getElementById('stockModalTitle').textContent = 'Existencias: ' + nombre;
-  openModal('stockModal');
-}
-
-function setStkOp(op) {
-  stkOpActual = op;
-  document.getElementById('sOpSumar').className = op === 'sumar' ? 'tab-btn active' : 'tab-btn';
-  document.getElementById('sOpRestar').className = op === 'restar' ? 'tab-btn active' : 'tab-btn';
-}
-
-function saveStockAjuste() {
-  var id = document.getElementById('sId').value;
-  var actual = parseInt(document.getElementById('sActual').textContent);
-  var cant = parseInt(document.getElementById('sCant').value || 0);
-
-  if(cant <= 0) return alert('Ingresa cantidades operativas');
-  var nuevoStock = stkOpActual === 'sumar' ? (actual + cant) : (actual - cant);
-
-  db.collection("productos").doc(id).update({ stock: nuevoStock })
-    .then(() => closeModal('stockModal'));
-}
-
-// ══════════════════════════════════════════
-// VENTAS ESTRUCTURADAS CON FLUJO DOCK
-// ══════════════════════════════════════════
-function filtrarVentaProductos() {
-  var q = document.getElementById('vBuscarProd').value.toLowerCase();
-  var box = document.getElementById('vListaSugerencias');
-  box.innerHTML = '';
-
-  if(!q) { box.style.display = 'none'; return; }
-  box.style.display = 'block';
-
-  productos.forEach(p => {
-    if(p.nombre.toLowerCase().indexOf(q) === -1) return;
-    var row = document.createElement('div');
-    row.style = 'padding:10px; background:#fff; border-bottom:1px solid #eee; font-size:13px; cursor:pointer;';
-    row.textContent = p.nombre + ' ($' + parseFloat(p.precio).toFixed(2) + ')';
-    row.onclick = () => agregarItemAVenta(p);
-    box.appendChild(row);
-  });
-}
-
-function agregarItemAVenta(prod) {
-  document.getElementById('vBuscarProd').value = '';
-  document.getElementById('vListaSugerencias').style.display = 'none';
-
-  var existente = ventaItems.find(i => i.id === prod.id);
-  if(existente) { existente.cant++; } 
-  else { ventaItems.push({ id: prod.id, nombre: prod.nombre, precio: prod.precio, cant: 1 }); }
-  
-  renderVentaItemsTemporales();
-}
-
-function renderVentaItemsTemporales() {
-  var el = document.getElementById('vItemsTemporales');
-  el.innerHTML = '';
-  ventaItems.forEach((item, idx) => {
-    var div = document.createElement('div');
-    div.className = 'card-item';
-    div.innerHTML = `<div class="card-left"><div class="card-title">${item.nombre}</div><div class="card-subtitle">$${item.precio} x ${item.cant} u.</div></div>
-                     <div class="card-right"><div class="card-price">$${(item.precio * item.cant).toFixed(2)}</div>
-                     <button style="border:none;background:transparent;color:var(--red);font-size:11px" onclick="ventaItems.splice(${idx},1);renderVentaItemsTemporales();">Quitar</button></div>`;
-    el.appendChild(div);
-  });
-}
-
-function finalizarVentaEstructurada() {
-  if(ventaItems.length === 0) return alert('Añade productos primero');
-  
-  var totalCalculado = 0;
-  var resumenTexto = "Venta: ";
-  
-  ventaItems.forEach(i => {
-    totalCalculado += (i.precio * i.cant);
-    resumenTexto += i.nombre + " (x" + i.cant + ") ";
-    
-    // Descuento automático de inventario
-    var pOriginal = productos.find(p => p.id === i.id);
-    if(pOriginal) {
-      var nStk = (pOriginal.stock || 0) - i.cant;
-      db.collection("productos").doc(i.id).update({ stock: nStk });
-    }
-  });
-
-  db.collection("ventas").add({
-    concepto: resumenTexto,
-    monto: totalCalculado,
-    fecha: getFechaKey(currentDate),
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(() => {
-    alert('Venta procesada y stock descontado con éxito');
-    ventaItems = [];
-    renderVentaItemsTemporales();
-    navegar('resumen');
-  });
-}
-
-// ══════════════════════════════════════════
-// ENCARGOS Y REPORTES EN PANTALLA
-// ══════════════════════════════════════════
-function setPedidoTab(tab) {
-  pedidoTab = tab;
-  document.getElementById('tabPedPendiente').className = tab === 'pendiente' ? 'tab-btn active' : 'tab-btn';
-  document.getElementById('tabPedEntregado').className = tab === 'entregado' ? 'tab-btn active' : 'tab-btn';
-  renderPedidos();
-}
-
-function renderPedidos() {
-  var key = getFechaKey(currentDate);
-  var lista = data[key]?.pedidos || [];
-  var container = document.getElementById('listaPedidos');
-  container.innerHTML = '';
-
-  lista.forEach(p => {
-    var est = p.estado || 'pendiente';
-    if(est !== pedidoTab) return;
-
-    var item = document.createElement('div');
-    item.className = 'card-item';
-    item.innerHTML = `<div class="card-left"><div class="card-title">${p.cliente}</div><div class="card-subtitle">${p.detalle}</div>
-                      <div class="card-subtitle text-orange">Abonado: $${parseFloat(p.abono || 0).toFixed(2)}</div></div>
-                      <div class="card-right"><div class="card-price">$${parseFloat(p.total).toFixed(2)}</div>
-                      ${est === 'pendiente' ? `<button style="border:none;background:var(--primary);color:#fff;padding:4px 8px;border-radius:4px;font-size:11px" onclick="entregarPedido('${p.id}',${p.total},${p.abono})">Entregar</button>` : '<span class="text-green" font-size="11px">Entregado</span>'}</div>`;
-    container.appendChild(item);
-  });
-}
-
-function guardarPedido() {
-  var cli = document.getElementById('pedCliente').value;
-  var det = document.getElementById('pedDetalle').value;
-  var tot = parseFloat(document.getElementById('pedTotal').value || 0);
-  var abo = parseFloat(document.getElementById('pedAbono').value || 0);
-
-  if(!cli || tot <= 0) return alert('Completa los campos del pedido');
-
-  var key = getFechaKey(currentDate);
-  db.collection("pedidos").add({
-    cliente: cli, detalle: det, total: tot, abono: abo, estado: 'pendiente', fecha: key
-  }).then(() => {
-    // Si hubo abono, se ingresa como venta del día de hoy
-    if(abo > 0) {
-      db.collection("ventas").add({ concepto: "Abono de: " + cli, monto: abo, fecha: key });
-    }
-    closeModal('nuevoPedidoModal');
-    document.getElementById('pedCliente').value = '';
-    document.getElementById('pedDetalle').value = '';
-    document.getElementById('pedTotal').value = '';
-    document.getElementById('pedAbono').value = '0';
-  });
-}
-
-function entregarPedido(id, total, abono) {
-  var restante = total - abono;
-  var key = getFechaKey(currentDate);
-  
-  if(confirm('¿Procesar entrega? Se registrará una venta por el saldo restante de: $' + restante.toFixed(2))) {
-    db.collection("pedidos").doc(id).update({ estado: 'entregado' }).then(() => {
-      if(restante > 0) {
-        db.collection("ventas").add({ concepto: "Cancelación encargo entrega", monto: restante, fecha: key });
-      }
-    });
-  }
-}
-
-// GENERACIÓN DE REPORTES CONTROLADOS
-function generarReporteDia() {
-  var key = getFechaKey(currentDate);
-  var dia = data[key] || { ventas: [], gastos: [] };
-  
-  var win = window.open('', '_blank');
-  win.document.write('<html><head><title>Reporte ' + key + '</title>');
-  win.document.write('<style>body{font-family:sans-serif;padding:30px;color:#333;} h1{color:#0a3d2e;} table{width:100%;border-collapse:collapse;margin-top:20px;} th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left;} th{background:#f5f5f5;}</style></head><body>');
-  
-  win.document.write('<h1>Reporte de Caja - JR Ventas</h1>');
-  win.document.write('<p><strong>Fecha de Operación:</strong> ' + key + '</p>');
-  
-  win.document.write('<h3>Ventas e Ingresos</h3><table><tr><th>Concepto</th><th>Monto</th></tr>');
-  var tv = 0; dia.ventas.forEach(v => { tv += v.monto; win.document.write('<tr><td>'+v.concepto+'</td><td>$'+v.monto.toFixed(2)+'</td></tr>'); });
-  win.document.write('<tr><td><strong>Total Ventas:</strong></td><td><strong>$'+tv.toFixed(2)+'</strong></td></tr></table>');
-
-  win.document.write('<h3>Gastos y Deducciones</h3><table><tr><th>Concepto</th><th>Monto</th></tr>');
-  var tg = 0; dia.gastos.forEach(g => { tg += g.monto; win.document.write('<tr><td>'+g.concepto+'</td><td>$'+g.monto.toFixed(2)+'</td></tr>'); });
-  win.document.write('<tr><td><strong>Total Gastos:</strong></td><td><strong>$'+tg.toFixed(2)+'</strong></td></tr></table>');
-  
-  var net = tv - tg;
-  win.document.write('<br><p style="font-size:18px"><strong>Ganancia Bruta Neta del Día: <span style="color:'+(net>=0?'green':'red')+'">$'+net.toFixed(2)+'</span></strong></p>');
-  
-  win.document.write('<button onclick="window.print()" style="margin-top:30px;background:#0a3d2e;color:#fff;padding:10px 20px;border:none;border-radius:5px;cursor:pointer;">Imprimir comprobante</button>');
-  win.document.write('</body></html>');
-  win.document.close();
-}
-</script>
+<script src="app.js"></script>
 </body>
 </html>
